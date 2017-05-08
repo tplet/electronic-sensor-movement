@@ -36,7 +36,7 @@ namespace com
                         /**
                          * Sensor identifier
                          */
-                        static byte const SENSOR = Identity::WEATHER;
+                        static byte const SENSOR = Identity::MOVEMENT;
 
                         /**
                          * Constructor
