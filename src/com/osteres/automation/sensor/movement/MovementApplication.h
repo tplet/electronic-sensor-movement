@@ -77,7 +77,7 @@ namespace com
                             ArduinoApplication::setup();
 
                             // Ensure that arduino keep alive (power supply)
-                            this->getUnlockShutdownProperty()->set(false);
+                            this->getUnlockShutdownProperty()->set(0);
 
                             // Transmission
                             this->transmitter->setActionManager(this->getActionManager());
@@ -108,7 +108,7 @@ namespace com
                                 this->transmitter->srs();
 
                                 // Now, arduino can be turned off
-                                this->getUnlockShutdownProperty()->set(true);
+                                this->getUnlockShutdownProperty()->set(1);
                                 // From here, potentially, arduino shutdown
                             }
 
@@ -146,7 +146,7 @@ namespace com
                          * Get unlock shutdown property
                          * If false, arduino keep alive, otherwise power can be cut off
                          */
-                        PinProperty<bool> * getUnlockShutdownProperty()
+                        PinProperty<unsigned int> * getUnlockShutdownProperty()
                         {
                             return this->unlockShutdownProperty;
                         }
@@ -163,7 +163,7 @@ namespace com
                             this->setActionManager(actionManager);
 
                             // Unlock shutdown property
-                            this->unlockShutdownProperty = new PinProperty<bool>(unlockShutdownPin, true, false);
+                            this->unlockShutdownProperty = new PinProperty<unsigned int>(unlockShutdownPin, true, false);
                         }
 
                         /**
@@ -173,9 +173,9 @@ namespace com
 
                         /**
                          * Unlock shutdown property
-                         * If false, arduino keep alive, otherwise power can be cut off
+                         * If 0, arduino keep alive, if 1 power can be cut off
                          */
-                        PinProperty<bool> * unlockShutdownProperty = NULL;
+                        PinProperty<unsigned int> * unlockShutdownProperty = NULL;
                     };
                 }
             }
