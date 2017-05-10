@@ -14,11 +14,13 @@
 #include <com/osteres/automation/sensor/Identity.h>
 #include <com/osteres/automation/sensor/movement/action/ActionManager.h>
 #include <com/osteres/automation/sensor/movement/action/TransmitMovement.h>
+#include <com/osteres/automation/arduino/memory/PinProperty.h>
 
 using com::osteres::automation::arduino::ArduinoApplication;
 using com::osteres::automation::sensor::Identity;
 using com::osteres::automation::sensor::movement::action::ActionManager;
 using com::osteres::automation::sensor::movement::action::TransmitMovement;
+using com::osteres::automation::arduino::memory::PinProperty;
 
 namespace com
 {
@@ -42,10 +44,11 @@ namespace com
                          * Constructor
                          */
                         MovementApplication(
-                            Transmitter *transmitter
+                            Transmitter *transmitter,
+                            unsigned int unlockShutdownPin
                         ) : ArduinoApplication(MovementApplication::SENSOR, transmitter)
                         {
-                            this->construct();
+                            this->construct(unlockShutdownPin);
                         }
 
                         /**
@@ -58,6 +61,11 @@ namespace com
                                 delete this->actionMovement;
                                 this->actionMovement = NULL;
                             }
+                            // Remove unlock shutdown property
+                            if (this->unlockShutdownProperty != NULL) {
+                                delete this->unlockShutdownProperty;
+                                this->unlockShutdownProperty = NULL;
+                            }
                         }
 
                         /**
@@ -67,6 +75,9 @@ namespace com
                         {
                             // Parent
                             ArduinoApplication::setup();
+
+                            // Ensure that arduino keep alive (power supply)
+                            this->getUnlockShutdownProperty()->set(false);
 
                             // Transmission
                             this->transmitter->setActionManager(this->getActionManager());
@@ -78,7 +89,7 @@ namespace com
                         virtual void process()
                         {
                             // Request an identifier if needed. Note: Not mandatory anymore
-                            if (false && this->isNeedIdentifier()) {
+                            if (this->isNeedIdentifier()) {
                                 this->requestForAnIdentifier();
 
                                 // Send and listen
@@ -95,6 +106,10 @@ namespace com
 
                                 // Send and listen
                                 this->transmitter->srs();
+
+                                // Now, arduino can be turned off
+                                this->getUnlockShutdownProperty()->set(true);
+                                // From here, potentially, arduino shutdown
                             }
 
                             // Wait 100ms
@@ -127,22 +142,40 @@ namespace com
                             return this->actionMovement;
                         }
 
+                        /**
+                         * Get unlock shutdown property
+                         * If false, arduino keep alive, otherwise power can be cut off
+                         */
+                        PinProperty<bool> * getUnlockShutdownProperty()
+                        {
+                            return this->unlockShutdownProperty;
+                        }
+
                     protected:
 
                         /**
                          * Common part constructor
                          */
-                        void construct()
+                        void construct(unsigned int unlockShutdownPin)
                         {
                             // Create action manager
                             ActionManager *actionManager = new ActionManager();
                             this->setActionManager(actionManager);
+
+                            // Unlock shutdown property
+                            this->unlockShutdownProperty = new PinProperty<bool>(unlockShutdownPin, true, false);
                         }
 
                         /**
                          * Action to transmit movement
                          */
                         TransmitMovement *actionMovement = NULL;
+
+                        /**
+                         * Unlock shutdown property
+                         * If false, arduino keep alive, otherwise power can be cut off
+                         */
+                        PinProperty<bool> * unlockShutdownProperty = NULL;
                     };
                 }
             }

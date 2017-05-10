@@ -65,6 +65,7 @@ namespace com
                                 // Prepare data
                                 packet->setSourceIdentifier(this->propertyIdentifier->get());
                                 packet->setCommand(Command::DATA);
+                                packet->setDataUChar1(1);
                                 packet->setTarget(this->to);
 
                                 // Transmit packet

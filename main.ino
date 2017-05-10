@@ -25,8 +25,10 @@ using com::osteres::automation::arduino::display::device::Screen;
 // Pins CE, CSN for ARDUINO
 #define RF_CE    9
 #define RF_CSN   10
-// Pin for battery level
+// Analog pin for battery level
 #define PIN_BATTERY_LEVEL_ANALOG 0
+// Digital pin for unlock power shutdown (0 -> lock, 1 -> unlock)
+#define PIN_UNLOCK_POWER 2
 
 /**
  * Configuration
@@ -45,7 +47,7 @@ RF24 radio(RF_CE, RF_CSN);
 // Transmission (master mode)
 Transmitter transmitter(&radio, false);
 // Application
-MovementApplication application(&transmitter);
+MovementApplication application(&transmitter, PIN_UNLOCK_POWER);
 // BatteryLevel
 BatteryLevel batteryLevel(PIN_BATTERY_LEVEL_ANALOG);
 
@@ -59,7 +61,7 @@ void setup() {
     float vcc = readVcc() / 1000.0;
     batteryLevel.setVcc(vcc);
     // Adjust real values of resistors
-    batteryLevel.setResistanceGnd(10.02e3);
+    batteryLevel.setResistanceGnd(10.01e3);
     batteryLevel.setResistanceVcc(3.28e3);
 
     // Set requester manually
