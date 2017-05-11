@@ -112,8 +112,8 @@ namespace com
                                 // From here, potentially, arduino shutdown
                             }
 
-                            // Wait 100ms
-                            delay(100);
+                            // Wait 5s
+                            delay(5000);
                         }
 
                         /**
